@@ -6,10 +6,11 @@
     <title>Language Galaxy</title>
     <style>
         body {
-            background: radial-gradient(circle, #ffffff 0%, #dcdcdc 100%);
+            /* Light blue background for the website */
+            background: radial-gradient(circle, #e0f2fe 0%, #bae6fd 100%);
             margin: 0;
             padding: 0;
-            font-family: sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -17,62 +18,59 @@
             overflow-x: hidden;
         }
 
-        /* Tamil Header - Stays centered at top */
         #header-center {
-            padding: 20px 0;
+            padding: 30px 0;
             display: flex;
             justify-content: center;
             width: 100%;
         }
 
         #tamil-center {
-            width: 160px;
-            height: 160px;
+            width: 170px;
+            height: 170px;
             border-radius: 50%;
             cursor: pointer;
-            border: 5px solid #ff5722;
-            box-shadow: 0 0 25px rgba(255, 87, 34, 0.3);
-            background-color: white; /* White BG for bubble */
-            object-fit: contain;    /* Shows FULL rectangular image */
-            padding: 5px;           /* Padding so image doesn't touch borders */
+            border: 6px solid #ff5722;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            background-color: white; /* Bubble background is white */
+            object-fit: contain;    /* Shows FULL card image */
+            padding: 12px;          
             transition: transform 0.2s ease;
         }
         #tamil-center:hover { transform: scale(1.1); }
 
-        /* Responsive Grid Container */
         #bubble-field {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
-            max-width: 1300px;
+            max-width: 1200px;
             padding: 20px;
-            gap: 12px;
+            gap: 18px;
         }
 
         .bubble {
             border-radius: 50%;
             cursor: pointer;
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 2px solid white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            background-color: white; /* White BG for the bubble */
-            object-fit: contain;    /* Ensures FULL handwritten card is visible */
-            padding: 8px;           /* Internal space so image fits nicely */
+            border: 3px solid white;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            background-color: white; /* Bubble background is white */
+            object-fit: contain;    /* Ensures full card is visible */
+            padding: 10px;          
         }
 
         .bubble:hover { 
             transform: scale(1.4); 
             z-index: 10; 
-            border-color: #03a9f4; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            border-color: #0ea5e9; 
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
         }
 
-        /* Mobile specific sizing */
         @media (max-width: 600px) {
-            #tamil-center { width: 130px; height: 130px; }
-            .bubble { width: 85px !important; height: 85px !important; }
-            #bubble-field { gap: 6px; }
+            #tamil-center { width: 140px; height: 140px; }
+            .bubble { width: 90px !important; height: 90px !important; }
+            #bubble-field { gap: 10px; }
         }
     </style>
 </head>
@@ -109,16 +107,14 @@
             const id = index + 1;
             const img = document.createElement('img');
             
-            // Image: 1_Afrikaans.jpg | Audio: 1. Afrikaans.mp3
+            // Matches: Images/1_Afrikaans.jpg
             img.src = `Images/${id}_${name}.jpg`; 
+            // Matches: Recordings/1. Afrikaans.mp3
             const audioPath = `Recordings/${id}. ${name}.mp3`;
             
             img.className = 'bubble';
-            
-            // Standard size for all to fit the screen better
-            const size = 100; 
-            img.style.width = size + 'px';
-            img.style.height = size + 'px';
+            img.style.width = '110px';
+            img.style.height = '110px';
 
             img.onclick = () => playAudio(audioPath);
             field.appendChild(img);
