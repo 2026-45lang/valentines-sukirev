@@ -1,175 +1,424 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Language Galaxy</title>
-    <style>
-        body {
-            background: radial-gradient(circle, #ffffff 0%, #dcdcdc 100%);
-            margin: 0;
-            padding: 0;
-            font-family: sans-serif;
-            overflow: hidden; 
-            height: 100vh;
-            width: 100vw;
-            touch-action: none;
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>45 Languages – Love You</title>
+  <style>
+    :root{
+      --bg:#0b0c10;
+      --card:#12141b;
+      --ink:#e9ecf1;
+      --muted:#9aa3b2;
+      --ring: rgba(255,255,255,.10);
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 600px at 20% 0%, rgba(73,108,255,.18), transparent 55%),
+                  radial-gradient(1000px 700px at 85% 20%, rgba(255,106,193,.12), transparent 55%),
+                  var(--bg);
+      color:var(--ink);
+    }
+    header{
+      max-width: 1200px;
+      margin: 34px auto 16px;
+      padding: 0 18px;
+      display:flex;
+      gap:14px;
+      align-items:flex-end;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    h1{
+      margin:0;
+      font-size: clamp(18px, 2.6vw, 28px);
+      letter-spacing:.3px;
+    }
+    .sub{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size: 14px;
+      line-height:1.35;
+      max-width: 780px;
+    }
+    .now{
+      color:var(--muted);
+      font-size: 13px;
+      padding:10px 12px;
+      border:1px solid var(--ring);
+      border-radius: 999px;
+      background: rgba(255,255,255,.04);
+      backdrop-filter: blur(8px);
+      display:flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+      max-width: 100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:999px;
+      background: rgba(255,255,255,.25);
+      flex: 0 0 auto;
+    }
+    .dot.playing{ background: #62ffb6; box-shadow: 0 0 0 6px rgba(98,255,182,.12); }
 
-        #viewport {
-            width: 100%;
-            height: 100%;
-            cursor: grab;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
+    main{
+      max-width: 1200px;
+      margin: 0 auto 60px;
+      padding: 0 18px;
+    }
 
-        #viewport:active { cursor: grabbing; }
+    /* Grid */
+    .grid{
+      display:grid;
+      gap: 14px;
+      grid-auto-flow: dense;
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      align-items: start;
+    }
+    @media (max-width: 1100px){ .grid{ grid-template-columns: repeat(8, 1fr); } }
+    @media (max-width: 900px){  .grid{ grid-template-columns: repeat(6, 1fr); } }
+    @media (max-width: 650px){  .grid{ grid-template-columns: repeat(3, 1fr); } }
 
-        #panning-surface {
-            position: absolute;
-            width: 3000px;
-            height: 3000px;
-            will-change: transform;
-        }
+    .tile{
+      position:relative;
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--ring);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      cursor:pointer;
+      transition: transform .16s ease, border-color .16s ease, background .16s ease;
+      transform: translateZ(0);
+      user-select:none;
+    }
+    .tile:hover{
+      transform: scale(1.06);
+      border-color: rgba(255,255,255,.22);
+      background: rgba(255,255,255,.06);
+      z-index: 5;
+    }
+    .tile:active{ transform: scale(1.03); }
 
-        /* Central Tamil Bubble */
-        #tamil-center {
-            position: absolute;
-            z-index: 10;
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 6px solid #ff5722;
-            box-shadow: 0 0 40px rgba(255, 87, 34, 0.5);
-            object-fit: cover;
-            left: 1500px;
-            top: 1500px;
-            transform: translate(-50%, -50%);
-            transition: transform 0.2s ease;
-        }
-        #tamil-center:hover { transform: translate(-50%, -50%) scale(1.1); }
+    /* Slightly different sizes */
+    .w1{ grid-column: span 1; }
+    .w2{ grid-column: span 2; }
+    .h1{ grid-row: span 1; }
+    .h2{ grid-row: span 2; }
 
-        /* Other Language Bubbles */
-        .bubble {
-            position: absolute;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            object-fit: cover;
-            border: 2px solid white;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-        }
-        .bubble:hover { transform: scale(1.3); z-index: 20; border-color: #03a9f4; }
-        .bubble:active { transform: scale(0.9); }
-    </style>
+    .tile img{
+      width:100%;
+      height:100%;
+      object-fit: cover;
+      display:block;
+      filter: contrast(1.02) saturate(1.02);
+    }
+    .cap{
+      position:absolute;
+      inset: auto 10px 10px 10px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      background: rgba(0,0,0,.50);
+      border: 1px solid rgba(255,255,255,.12);
+      backdrop-filter: blur(8px);
+      font-size: 12px;
+      letter-spacing:.2px;
+      line-height:1.2;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+    }
+    .cap .name{ color: #f2f4f8; }
+    .cap .num{ color: rgba(255,255,255,.65); font-variant-numeric: tabular-nums; }
+
+    /* Tamil in the center (desktop-ish) */
+    .tamil{
+      grid-column: 5 / span 2;
+    }
+    @media (max-width: 1100px){ .tamil{ grid-column: 4 / span 2; } }
+    @media (max-width: 900px){  .tamil{ grid-column: 3 / span 2; } }
+    @media (max-width: 650px){  .tamil{ grid-column: 2 / span 2; } }
+
+    /* Toast */
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--ring);
+      background: rgba(15,16,22,.72);
+      color: rgba(255,255,255,.85);
+      font-size: 13px;
+      backdrop-filter: blur(10px);
+      display:none;
+      max-width: min(92vw, 900px);
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  </style>
 </head>
+
 <body>
-
-    <div id="viewport">
-        <div id="panning-surface">
-            <img src="Images/457_Tamil.jpg" id="tamil-center" alt="Tamil" onclick="playAudio('Recordings/Tamil_intro.mp3')">
-            <div id="bubble-field"></div>
-        </div>
+  <header>
+    <div>
+      <h1>45 Languages</h1>
+      <p class="sub">Hover to zoom. Click a card to play the matching recording.</p>
     </div>
+    <div class="now" id="nowPlaying" title="">
+      <span class="dot" id="playDot"></span>
+      <span id="nowText">Click any language to play</span>
+    </div>
+  </header>
 
-    <script>
-        // List based on your folder screenshots
-        const languages = [
-            "Afrikaans", "Albanian", "Amharic", "Arabic", "Basque", "Bengali", 
-            "Bosnian", "Bulgarian", "Cantonese", "Catalan", "Chinese", "Czech", 
-            "Danish", "Dutch", "English", "Estonian", "Filipino", "Finnish", 
-            "French", "Galician", "German", "Greek", "Gujarati", "Hausa", 
-            "Hebrew", "Hindi", "Hungarian", "Icelandic", "Indonesian", "Italian", 
-            "Japanese", "Javanese", "Kannada", "Khmer", "Korean", "Latin", 
-            "Latvian", "Lithuanian", "Malay", "Malayalam", "Burmese", "Russian", 
-            "Swedish", "Thai", "Turkish"
-        ];
+  <main>
+    <section class="grid" id="grid"></section>
+  </main>
 
-        const surface = document.getElementById('panning-surface');
-        const field = document.getElementById('bubble-field');
-        let currentAudio = null;
+  <div class="toast" id="toast"></div>
 
-        function playAudio(path) {
-            if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
-            currentAudio = new Audio(path);
-            currentAudio.play().catch(e => console.error("Audio failed:", e));
+  <audio id="player" preload="none"></audio>
+
+  <script>
+    // === EDIT ONLY IF NEEDED ===
+    // 1) Put this index.html in the ROOT (same level as Images/ and Recordings/)
+    // 2) Keep folders exactly: Images/ and Recordings/
+    // 3) This code tries multiple filename patterns + extensions automatically.
+
+    const items = [
+      { n: 1,  lang: "Afrikaans" },
+      { n: 2,  lang: "Albanian" },
+      { n: 3,  lang: "Amharic" },
+      { n: 4,  lang: "Arabic" },
+      { n: 5,  lang: "Basque" },
+      { n: 6,  lang: "Bengali" },
+      { n: 7,  lang: "Bosnian" },
+      { n: 8,  lang: "Bulgarian" },
+      { n: 9,  lang: "Cantonese" },
+      { n: 10, lang: "Catalan" },
+      { n: 11, lang: "Chinese" },
+      { n: 12, lang: "Czech" },
+      { n: 13, lang: "Danish" },
+      { n: 14, lang: "Dutch" },
+      { n: 15, lang: "English" },
+      { n: 16, lang: "Estonian" },
+      { n: 17, lang: "Filipino" },
+      { n: 18, lang: "Finnish" },
+      { n: 19, lang: "French" },
+      { n: 20, lang: "Galician" },
+      { n: 21, lang: "German" },
+      { n: 22, lang: "Greek" },
+      { n: 23, lang: "Gujarati" },
+      { n: 24, lang: "Hausa" },
+      { n: 25, lang: "Hebrew" },
+      { n: 26, lang: "Hindi" },
+      { n: 27, lang: "Hungarian" },
+      { n: 28, lang: "Icelandic" },
+      { n: 29, lang: "Indonesian" },
+      { n: 30, lang: "Italian" },
+      { n: 31, lang: "Japanese" },
+      { n: 32, lang: "Javanese" },
+      { n: 33, lang: "Kannada" },
+      { n: 34, lang: "Khmer" },
+      { n: 35, lang: "Korean" },
+      { n: 36, lang: "Latin" },
+      { n: 37, lang: "Latvian" },
+      { n: 38, lang: "Lithuanian" },
+      { n: 39, lang: "Malay" },
+      { n: 40, lang: "Malayalam" },
+      { n: 41, lang: "Burmese" },
+      { n: 42, lang: "Russian" },
+      { n: 43, lang: "Swedish" },
+      { n: 44, lang: "Thai" },
+      { n: 45, lang: "Turkish" },
+      // Tamil special: image looks like "457_Tamil", recording looks like "Tamil_intro"
+      { n: 457, lang: "Tamil", specialAudioBase: "Tamil_intro", makeCenter: true }
+    ];
+
+    // Try these extensions (add/remove if your files differ)
+    const IMG_EXTS   = ["png", "jpg", "jpeg", "webp"];
+    const AUDIO_EXTS = ["mp3", "m4a", "wav", "ogg"];
+
+    // Candidate base-name patterns we will try for audio.
+    // Your recordings show "1. Afrikaans" etc, but you said (number_language).
+    // So we try BOTH:
+    function audioBaseCandidates(item){
+      const n = item.n;
+      const L = item.lang;
+      if (item.specialAudioBase) return [item.specialAudioBase];
+
+      // common candidates
+      return [
+        `${n}_${L}`,
+        `${n}-${L}`,
+        `${n} ${L}`,
+        `${n}.${L}`,
+        `${n}. ${L}`,
+        `${n}) ${L}`,
+        `${n}.` + L.replace(/\s+/g,""),
+        `${n}_${L.replace(/\s+/g,"")}`,
+      ];
+    }
+
+    // Images appear as "1_Afrikaans" etc (Tamil: "457_Tamil")
+    function imageBaseCandidates(item){
+      const n = item.n;
+      const L = item.lang;
+      return [
+        `${n}_${L}`,
+        `${n}-${L}`,
+        `${n} ${L}`,
+        `${n}.${L}`,
+        `${n}. ${L}`,
+        `${n}_${L.replace(/\s+/g,"")}`,
+      ];
+    }
+
+    async function findFirstExisting(urls){
+      // In GitHub Pages, HEAD usually works. If blocked, we fall back to trying to load.
+      for (const url of urls){
+        try{
+          const r = await fetch(url, { method: "HEAD", cache: "no-store" });
+          if (r.ok) return url;
+        }catch(e){
+          // ignore and keep trying
+        }
+      }
+      // Fallback: just return the first; browser will show broken if not present
+      return urls[0];
+    }
+
+    function sizeClassForIndex(i){
+      // deterministic “random-ish” sizes
+      const m = i % 10;
+      if (m === 0 || m === 6) return ["w2","h2"];
+      if (m === 3 || m === 8) return ["w2","h1"];
+      if (m === 5)            return ["w1","h2"];
+      return ["w1","h1"];
+    }
+
+    const grid = document.getElementById("grid");
+    const player = document.getElementById("player");
+    const nowText = document.getElementById("nowText");
+    const nowWrap = document.getElementById("nowPlaying");
+    const playDot = document.getElementById("playDot");
+    const toast = document.getElementById("toast");
+
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.style.display = "block";
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(()=> toast.style.display="none", 2200);
+    }
+
+    function setNowPlaying(text){
+      nowText.textContent = text;
+      nowWrap.title = text;
+    }
+
+    player.addEventListener("play", ()=> playDot.classList.add("playing"));
+    player.addEventListener("pause", ()=> playDot.classList.remove("playing"));
+    player.addEventListener("ended", ()=> playDot.classList.remove("playing"));
+
+    async function build(){
+      // Put Tamil roughly in the middle of the list visually by sorting with a “center weight”
+      const sorted = [...items].sort((a,b)=>{
+        const aw = a.makeCenter ? 0.5 : (a.n/1000);
+        const bw = b.makeCenter ? 0.5 : (b.n/1000);
+        return aw - bw || a.n - b.n;
+      });
+
+      for (let i=0; i<sorted.length; i++){
+        const item = sorted[i];
+
+        // Build possible image URLs
+        const imgBases = imageBaseCandidates(item);
+        const imgUrls = imgBases.flatMap(base => IMG_EXTS.map(ext => `Images/${base}.${ext}`));
+        const imgUrl = await findFirstExisting(imgUrls);
+
+        // Precompute possible audio URLs (we’ll pick on click to reduce requests)
+        const audioBases = audioBaseCandidates(item);
+        const audioUrls = audioBases.flatMap(base => AUDIO_EXTS.map(ext => `Recordings/${base}.${ext}`));
+
+        const tile = document.createElement("div");
+        tile.className = "tile";
+
+        const [w,h] = sizeClassForIndex(i);
+        tile.classList.add(w,h);
+        if (item.makeCenter) tile.classList.add("tamil");
+
+        tile.setAttribute("role","button");
+        tile.setAttribute("tabindex","0");
+        tile.setAttribute("aria-label", `${item.lang}. Click to play.`);
+
+        const img = document.createElement("img");
+        img.src = imgUrl;
+        img.alt = item.lang;
+        img.loading = "lazy";
+
+        // If HEAD failed and this URL is wrong, cycle through remaining candidates
+        img.onerror = () => {
+          const next = imgUrls.find(u => u !== img.src);
+          if (next) img.src = next;
+        };
+
+        const cap = document.createElement("div");
+        cap.className = "cap";
+        cap.innerHTML = `<span class="name">${item.lang}</span><span class="num">${item.n}</span>`;
+
+        tile.appendChild(img);
+        tile.appendChild(cap);
+
+        async function playThis(){
+          // Stop current audio
+          player.pause();
+          player.currentTime = 0;
+
+          // Find first existing audio file
+          let chosen = null;
+          for (const url of audioUrls){
+            try{
+              const r = await fetch(url, { method:"HEAD", cache:"no-store" });
+              if (r.ok){ chosen = url; break; }
+            }catch(e){}
+          }
+          if (!chosen){
+            // fallback: just attempt the first one
+            chosen = audioUrls[0];
+          }
+
+          player.src = chosen;
+          try{
+            await player.play();
+            setNowPlaying(`Now playing: ${item.lang}`);
+          }catch(err){
+            setNowPlaying(`Could not play: ${item.lang}`);
+            showToast(`Audio not found for: ${item.lang} (check filename/extensions)`);
+          }
         }
 
-        // --- BUBBLE GENERATION ---
-        languages.forEach((name, index) => {
-            const id = index + 1;
-            const img = document.createElement('img');
-            
-            // Image naming: "1_Afrikaans.jpg"
-            img.src = `Images/${id}_${name}.jpg`; 
-            // Recording naming: "1. Afrikaans.mp3"
-            const audioPath = `Recordings/${id}. ${name}.mp3`;
-            
-            img.className = 'bubble';
-            
-            // Randomized sizes
-            const size = Math.floor(Math.random() * 40) + 90;
-            img.style.width = size + 'px';
-            img.style.height = size + 'px';
-
-            // Galaxy orbit distribution logic
-            const angle = Math.random() * Math.PI * 2;
-            const distance = Math.floor(Math.random() * 700) + 250; 
-            
-            const x = 1500 + Math.cos(angle) * distance;
-            const y = 1500 + Math.sin(angle) * distance;
-
-            img.style.left = `${x - size/2}px`;
-            img.style.top = `${y - size/2}px`;
-            
-            img.onclick = (e) => { 
-                e.stopPropagation(); 
-                playAudio(audioPath); 
-            };
-            field.appendChild(img);
+        tile.addEventListener("click", playThis);
+        tile.addEventListener("keydown", (e)=>{
+          if (e.key === "Enter" || e.key === " "){
+            e.preventDefault();
+            playThis();
+          }
         });
 
-        // --- DRAG / PANNING LOGIC ---
-        let isDragging = false;
-        let startX, startY;
-        
-        // Offset to start centered on Tamil
-        let translateX = -(1500 - window.innerWidth / 2);
-        let translateY = -(1500 - window.innerHeight / 2);
+        grid.appendChild(tile);
+      }
+    }
 
-        surface.style.transform = `translate(${translateX}px, ${translateY}px)`;
-
-        const onStart = (e) => {
-            isDragging = true;
-            const clientX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
-            const clientY = e.pageY || (e.touches ? e.touches[0].pageY : 0);
-            startX = clientX - translateX;
-            startY = clientY - translateY;
-        };
-
-        const onMove = (e) => {
-            if (!isDragging) return;
-            e.preventDefault();
-            const clientX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
-            const clientY = e.pageY || (e.touches ? e.touches[0].pageY : 0);
-            translateX = clientX - startX;
-            translateY = clientY - startY;
-            surface.style.transform = `translate(${translateX}px, ${translateY}px)`;
-        };
-
-        const onEnd = () => { isDragging = false; };
-
-        const vp = document.getElementById('viewport');
-        vp.addEventListener('mousedown', onStart);
-        vp.addEventListener('touchstart', onStart);
-        window.addEventListener('mousemove', onMove);
-        window.addEventListener('touchmove', onMove, { passive: false });
-        window.addEventListener('mouseup', onEnd);
-        window.addEventListener('touchend', onEnd);
-    </script>
+    build();
+  </script>
 </body>
 </html>
